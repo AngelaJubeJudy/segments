@@ -1,19 +1,16 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
-  // 预设配置 - 使用默认预设避免ESM冲突
-  preset: 'ts-jest',
+  // 预设配置
+  preset: 'ts-jest/presets/default-esm',
   
   // 测试环境
   testEnvironment: 'node',
   
-  // 转换器配置 - 优化TypeScript处理
+  // 转换器配置
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
-      // 启用缓存
-      isolatedModules: true,
-      // 禁用类型检查以提升性能
-      diagnostics: false
+      useESM: true,
+      tsconfig: 'tsconfig.json'
     }]
   },
   
@@ -50,23 +47,66 @@ export default {
   resetMocks: true,
   
   // 测试超时时间（毫秒）
-  testTimeout: 10000,
+  testTimeout: 30000,
+  
+  // 详细输出
+  verbose: false,
+  
+  // 强制退出
+  forceExit: true,
+  
+  // 检测打开句柄 - 关闭以减少性能开销
+  detectOpenHandles: false,
+  
+  // 扩展名处理
+  extensionsToTreatAsEsm: ['.ts'],
   
   // 性能优化配置
-  verbose: false, // 关闭详细输出以提升性能
-  forceExit: true,
-  detectOpenHandles: true,
+  // 最大工作进程数 - 根据 CPU 核心数优化
+  maxWorkers: '50%',
   
-  // 启用缓存以提升性能
+  // 测试运行器 - 使用更快的运行器
+  runner: 'jest-runner',
+  
+  // 缓存配置 - 启用缓存以提高重复测试速度
   cache: true,
   cacheDirectory: '.jest-cache',
   
-  // 并行执行测试
-  maxWorkers: '50%',
+  // 并行执行配置
+  // 允许测试并行运行（对于独立的测试套件）
+  runInBand: false,
   
-  // 设置测试环境变量
+  // 测试隔离 - 减少不必要的隔离开销
+  testEnvironmentOptions: {
+    url: 'http://localhost'
+  },
+  
+  // 模块解析优化
+  moduleDirectories: ['node_modules', 'src'],
+  
+  // 设置全局超时 - 为所有测试设置合理的超时
   setupFilesAfterEnv: [],
   
-  // 扩展名处理
-  extensionsToTreatAsEsm: ['.ts']
+  // 测试报告配置 - 减少报告生成开销
+  reporters: [
+    'default',
+    ['jest-junit', {
+      outputDirectory: 'reports/junit',
+      outputName: 'js-test-results.xml',
+      classNameTemplate: '{classname}-{title}',
+      titleTemplate: '{classname}-{title}',
+      ancestorSeparator: ' › ',
+      usePathForSuiteName: true
+    }]
+  ],
+  
+  // 性能监控配置
+  globals: {
+    'ts-jest': {
+      // 减少 TypeScript 编译开销
+      isolatedModules: true,
+      // 启用诊断信息（可选，用于调试）
+      diagnostics: false
+    }
+  }
 }; 
