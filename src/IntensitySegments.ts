@@ -141,11 +141,11 @@ export class IntensitySegments {
                     newIntensity = amount;  // 更新
                 } else {
                     // 需要找到该点之前的强度值
-                    newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, amount);
+                    newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, isSet, amount);
                 }
             } else {
                 // 【add操作】计算统计强度值
-                newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, 0);
+                newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, isSet, 0);
                 if (position >= from && position < to) {
                     newIntensity += amount;  // 更新
                 }
@@ -166,7 +166,7 @@ export class IntensitySegments {
     /**
      * Private Function: 获取某点在更新前的强度值（用于 add 或 set 操作）
      */
-    private _getIntensityAtPositionBeforeUpdate(position: number, from: number, to: number, setAmount: number): number {
+    private _getIntensityAtPositionBeforeUpdate(position: number, from: number, to: number, isSet: boolean, setAmount: number): number {
         let maxIndex = -1;
 
         // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
@@ -176,16 +176,21 @@ export class IntensitySegments {
             }
         }
         
-        // 如果找到边界点，返回其强度值；否则返回0
+        // 没找到最小边界：返回强度初始值
         if (maxIndex === -1) {
             return INTENSITY_CONSTANTS.INITIAL_INTENSITY;
         }
         
-        // 如果这个边界点在要更新的区间内，需要考虑set操作的影响
+        // 找到了最小边界，且这个边界在[from, to)更新区间内：考虑 set 重置操作的关联影响
         if (position >= from && position < to) {
-            return setAmount;
+            if (isSet) {
+                return setAmount;
+            } else {
+                return this.intensities[maxIndex];
+            }
         }
         
+        // 找到了最小边界，且不受外部操作影响：返回最小边界位置的强度值
         return this.intensities[maxIndex];
     }
 
