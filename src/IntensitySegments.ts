@@ -164,12 +164,12 @@ export class IntensitySegments {
     }
 
     /**
-     * Private Function: 获取某点在更新前的强度值
-     * 这个方法用于在更新过程中获取某点的原始强度值
+     * Private Function: 获取某点在更新前的强度值（用于 add 或 set 操作）
      */
     private _getIntensityAtPositionBeforeUpdate(position: number, from: number, to: number, setAmount: number): number {
-        // 找到小于等于position的最大边界点
         let maxIndex = -1;
+
+        // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
         for (let i = 0; i < this.boundaries.length; i++) {
             if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
                 maxIndex = i;
@@ -178,7 +178,7 @@ export class IntensitySegments {
         
         // 如果找到边界点，返回其强度值；否则返回0
         if (maxIndex === -1) {
-            return 0;
+            return INTENSITY_CONSTANTS.INITIAL_INTENSITY;
         }
         
         // 如果这个边界点在要更新的区间内，需要考虑set操作的影响
@@ -198,6 +198,8 @@ export class IntensitySegments {
         let maxIndex = -1;
 
         // 从左到右遍历边界点位置，找到顺序位置“≤”该点的最大边界
+        // 索引范围：-1 ≤ maxIndex ≤ boundaries.length - 1
+        // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
         for (let i = 0; i < this.boundaries.length; i++) {
             if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
                 maxIndex = i;
