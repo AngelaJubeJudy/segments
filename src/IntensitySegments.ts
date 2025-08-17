@@ -3,12 +3,9 @@ import { validateInput, validatePosition } from './utils/validator';
 import { INTENSITY_CONSTANTS } from './constants/index';
 
 /**
- * 【数据结构设计】区间强度管理：每个边界点记录从该点开始的强度值
- * 优势：
- * 1. 插入操作：O(n) - 需要重新计算受影响区间的强度值
- * 2. 查询操作：O(log n) - 二分查找前一个边界点
+ * 【数据结构】区间强度管理：每个边界点记录从该点开始的强度值
  * 
- * 【核心思想】每个边界点记录从该点开始的强度值
+ * 【核心思想】每个边界点仅记录从该点开始的强度值
  * 当某点的强度变为0时，该边界点被删除（除了最后一个点）
  */
 export class IntensitySegments {
@@ -31,10 +28,18 @@ export class IntensitySegments {
      * segments.add(20, 40, 1);  // 在[20,40)上增加强度1，输出 "[[10, 1], [20, 2], [30, 1], [40, 0]]"
      * segments.add(10, 40, -2);  // 在[10,40)上减少强度2，输出 "[[10, -1], [20, 0], [30, -1], [40, 0]]"
      * ```
+     * 
+     * ```typescript
+     * segments2.toString(); // should be "[]"
+     * segments.add(10, 30, 1);  // 在[10,30)上增加强度1，输出 "[[10, 1], [30, 0]]"
+     * segments.add(20, 40, 1);  // 在[20,40)上增加强度1，输出 "[[10, 1], [20, 2], [30, 1], [40, 0]]"
+     * segments2.add(10, 40, -1);  // 在[10,40)上减少强度1，输出 "[[20, 1], [30, 0]]"
+     * segments2.add(10, 40, -1);  // 在[10,40)上减少强度1，输出 "[[10, -1], [20, 0], [30, -1], [40, 0]]"
+     * ```
      */
     add(from: number, to: number, amount: number): void {
         // 检查入参
-        const validInput = validateInput(from, to, amount);
+        const validInput = validateInput(from, to, amount);  //复杂度：O(1)
         if (!validInput.isValid) {
             throw new Error(`Invalid input: ${validInput.errors.join(', ')}`);
         }
@@ -45,7 +50,7 @@ export class IntensitySegments {
         }
 
         // 更新区间内的强度值
-        this._updateInterval(from, to, amount, false);
+        this._updateInterval(from, to, amount, false);  //复杂度：O(n)
     }
     
     /**
@@ -62,17 +67,17 @@ export class IntensitySegments {
      */
     set(from: number, to: number, amount: number): void {
         // 检查入参
-        const validInput = validateInput(from, to, amount);
+        const validInput = validateInput(from, to, amount);  //复杂度：O(1)
         if (!validInput.isValid) {
             throw new Error(`Invalid input: ${validInput.errors.join(', ')}`);
         }
 
-        // 先清除区间内的所有变化
-        this._clearInterval(from, to);
+        // step 1：清除目标区间内之前变化
+        this._clearInterval(from, to);  //复杂度：O(n)
         
-        // 设置新的强度值
+        // step 2：设置新值
         if (amount !== INTENSITY_CONSTANTS.ZERO_INTENSITY) {
-            this._updateInterval(from, to, amount, true);
+            this._updateInterval(from, to, amount, true);  //复杂度：O(n)
         }
     }
 
@@ -131,22 +136,22 @@ export class IntensitySegments {
             let newIntensity: number;
             
             if (isSet) {
-                // set操作：计算该点的新强度值
+                // 【set操作】计算新强度值
                 if (position >= from && position < to) {
-                    newIntensity = amount;
+                    newIntensity = amount;  // 更新
                 } else {
-                    // 对于set操作，需要找到该点之前的强度值
+                    // 需要找到该点之前的强度值
                     newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, amount);
                 }
             } else {
-                // add操作：计算该点的累积强度值
+                // 【add操作】计算统计强度值
                 newIntensity = this._getIntensityAtPositionBeforeUpdate(position, from, to, 0);
                 if (position >= from && position < to) {
-                    newIntensity += amount;
+                    newIntensity += amount;  // 更新
                 }
             }
             
-            // 只保留强度值不为0的边界点（除了最后一个点）
+            // 【边界处理】只保留强度值不为0的边界点（除了最后一个点）：（1）非零，（2）零值但最后一个边界点
             if (newIntensity !== 0 || i === sortedPoints.length - 1) {
                 newBoundaries.push(position);
                 newIntensities.push(newIntensity);
@@ -186,38 +191,41 @@ export class IntensitySegments {
 
     /**
      * Private Function: 获取某点的强度值
-     * 通过找到小于等于该点的最大边界点来获取强度值
+     * 操作：通过找到小于等于该点的最大边界点来获取强度值
+     * 原理：某一点的强度值，取决于其所在边界范围（interval）
      */
     private _getIntensityAtPosition(position: number): number {
-        // 找到小于等于position的最大边界点
         let maxIndex = -1;
+
+        // 从左到右遍历边界点位置，找到顺序位置“≤”该点的最大边界
         for (let i = 0; i < this.boundaries.length; i++) {
             if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
                 maxIndex = i;
             }
         }
         
-        // 如果找到边界点，返回其强度值；否则返回0
-        return maxIndex !== -1 ? this.intensities[maxIndex] : 0;
+        // 找到边界，返回强度、否则返回 0（默认值）
+        return maxIndex !== -1 ? this.intensities[maxIndex] : INTENSITY_CONSTANTS.INITIAL_INTENSITY;
     }
 
     /**
      * Private Function: 清除区间内的所有变化值
-     * 复杂度：O(k) - k为区间内边界点数量
+     * 复杂度：O(n) - n为区间内边界点数量
      */
     private _clearInterval(from: number, to: number): void {
-        // 找到区间内的所有边界点
         const indicesToRemove: number[] = [];
         
+        // 找到目标区间
         for (let i = 0; i < this.boundaries.length; i++) {
             if (this.boundaries[i] >= from && this.boundaries[i] < to) {
                 indicesToRemove.push(i);
             }
         }
         
-        // 从后往前删除，避免索引变化
+        // 数组动态特性处理：从后往前删除，避免过程中引起的索引变化
         for (let i = indicesToRemove.length - 1; i >= 0; i--) {
             const index = indicesToRemove[i];
+            // 删除 index 位置的 1 个元素
             this.boundaries.splice(index, 1);
             this.intensities.splice(index, 1);
         }
