@@ -26,7 +26,13 @@
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": false,
     "allowUnusedLabels": false,
-    "allowUnreachableCode": false
+    "allowUnreachableCode": false,
+    
+    // 性能优化配置
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSourceOfProjectReferenceRedirect": true
   },
   "include": [
     "src/**/*"
@@ -35,9 +41,11 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    ".jest-cache"
   ],
   "ts-node": {
-    "esm": false
+    "esm": false,
+    "transpileOnly": true
   }
 } 

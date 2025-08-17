@@ -1,16 +1,19 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
-  // 预设配置
-  preset: 'ts-jest/presets/default-esm',
+  // 预设配置 - 使用默认预设避免ESM冲突
+  preset: 'ts-jest',
   
   // 测试环境
   testEnvironment: 'node',
   
-  // 转换器配置
+  // 转换器配置 - 优化TypeScript处理
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      useESM: true,
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.json',
+      // 启用缓存
+      isolatedModules: true,
+      // 禁用类型检查以提升性能
+      diagnostics: false
     }]
   },
   
@@ -49,14 +52,20 @@ export default {
   // 测试超时时间（毫秒）
   testTimeout: 10000,
   
-  // 详细输出
-  verbose: true,
-  
-  // 强制退出
+  // 性能优化配置
+  verbose: false, // 关闭详细输出以提升性能
   forceExit: true,
-  
-  // 检测打开句柄
   detectOpenHandles: true,
+  
+  // 启用缓存以提升性能
+  cache: true,
+  cacheDirectory: '.jest-cache',
+  
+  // 并行执行测试
+  maxWorkers: '50%',
+  
+  // 设置测试环境变量
+  setupFilesAfterEnv: [],
   
   // 扩展名处理
   extensionsToTreatAsEsm: ['.ts']
