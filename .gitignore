@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Test coverage
+coverage/
+
+# Environment settings
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+logs
+*.log
+
+# npm cache
+.npm
