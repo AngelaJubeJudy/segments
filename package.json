@@ -8,14 +8,13 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
-    "test:fast": "jest --maxWorkers=4 --cache=false",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:unit": "jest --testPathPattern=unit",
-    "test:unit:fast": "jest --testPathPattern=unit --maxWorkers=4 --cache=false",
     "test:integration": "jest --testPathPattern=integration",
-    "test:performance": "jest --testPathPattern=performance",
-    "test:performance:fast": "jest --testPathPattern=performance --maxWorkers=2 --cache=false",
+    "test:performance": "jest --config=jest.performance.config.js",
+    "test:performance:fast": "jest --config=jest.performance.config.js --testTimeout=30000",
+    "test:performance:debug": "jest --config=jest.performance.config.js --verbose --testTimeout=120000",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
@@ -24,7 +23,7 @@
     "example": "npm run build && node dist/example.js",
     "debug": "npm run build && node dist/debug.js",
     "prepare": "npm run build",
-    "clean": "rm -rf dist coverage .jest-cache"
+    "clean": "rm -rf dist coverage .jest-cache .jest-performance-cache"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
