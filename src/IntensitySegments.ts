@@ -209,16 +209,42 @@ export class IntensitySegments {
                 }
             }
             
-            // 【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
             newBoundaries.push(position);
             newIntensities.push(newIntensity);
         }
 
-        // TODO：【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
+        // 【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
+        const filteredBoundaries: number[] = [];
+        const filteredIntensities: number[] = [];
         
-        // 更新内部状态
-        this.boundaries = newBoundaries;
-        this.intensities = newIntensities;
+        let headBoundaryIndex = -1;
+        let lastNonZeroIndex = -1;
+        
+        // 单次 O(n) 遍历：同时找到头边界、最后一个非0值尾边界
+        for (let i = 0; i < newIntensities.length; i++) {
+            const currentIntensity = newIntensities[i];
+            
+            // 找到索引：头边界，最后一个非0值尾边界
+            if (currentIntensity !== 0) {
+                if (headBoundaryIndex === -1) {
+                    headBoundaryIndex = i;  // 找到为止
+                }
+                lastNonZeroIndex = i;
+            }
+            
+            // 都是非零，则尾节点就是最后一个；有多个零值结尾，则尾节点是顺序第一个零值点
+            const tailBoundaryIndex = lastNonZeroIndex !== -1 ? lastNonZeroIndex + 1 : newIntensities.length - 1;
+            
+            // 判断是否保留当前点：头节点，尾节点，头尾之间所有节点
+            const shouldKeep = i === headBoundaryIndex || i === tailBoundaryIndex || (i > headBoundaryIndex && i < tailBoundaryIndex);
+            if (shouldKeep) {
+                filteredBoundaries.push(newBoundaries[i]);
+                filteredIntensities.push(newIntensities[i]);
+            }
+        }
+        
+        this.boundaries = filteredBoundaries;
+        this.intensities = filteredIntensities;
     }
 
     /**
