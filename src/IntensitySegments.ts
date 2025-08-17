@@ -238,8 +238,16 @@ export class IntensitySegments {
             // 判断是否保留当前点：头节点，尾节点，头尾之间所有节点
             const shouldKeep = i === headBoundaryIndex || i === tailBoundaryIndex || (i > headBoundaryIndex && i < tailBoundaryIndex);
             if (shouldKeep) {
-                filteredBoundaries.push(newBoundaries[i]);
-                filteredIntensities.push(newIntensities[i]);
+                // 根据规则：只保留强度值不为0的边界点（除了上边界）
+                const currentIntensity = newIntensities[i];
+                const isLastPoint = i === newIntensities.length - 1;
+                const isTailBoundary = i === tailBoundaryIndex;
+                
+                // 保留强度值不为0的点，或者尾边界点（上边界）
+                if (currentIntensity !== 0 || isTailBoundary || isLastPoint) {
+                    filteredBoundaries.push(newBoundaries[i]);
+                    filteredIntensities.push(newIntensities[i]);
+                }
             }
         }
         
