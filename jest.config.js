@@ -72,10 +72,6 @@ export default {
   cache: true,
   cacheDirectory: '.jest-cache',
   
-  // 并行执行配置
-  // 允许测试并行运行（对于独立的测试套件）
-  runInBand: false,
-  
   // 测试隔离 - 减少不必要的隔离开销
   testEnvironmentOptions: {
     url: 'http://localhost'
@@ -87,18 +83,8 @@ export default {
   // 设置全局超时 - 为所有测试设置合理的超时
   setupFilesAfterEnv: [],
   
-  // 测试报告配置 - 减少报告生成开销
-  reporters: [
-    'default',
-    ['jest-junit', {
-      outputDirectory: 'reports/junit',
-      outputName: 'js-test-results.xml',
-      classNameTemplate: '{classname}-{title}',
-      titleTemplate: '{classname}-{title}',
-      ancestorSeparator: ' › ',
-      usePathForSuiteName: true
-    }]
-  ],
+  // 测试报告配置 - 使用默认报告器
+  reporters: ['default'],
   
   // 性能监控配置
   globals: {

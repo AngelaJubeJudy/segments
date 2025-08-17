@@ -33,16 +33,16 @@ npm run build
 
 ## Development Commands
 ```bash
-# 开发模式：只构建项目，不运行任何代码
+# 开发模式
 npm run dev
 
-# 启动模式：只构建项目，不运行任何代码
+# 启动模式
 npm run start
 
-# 运行示例代码（仅在需要时使用）
+# 运行示例代码
 npm run example
 
-# 运行调试代码（仅在需要时使用）
+# 运行调试代码
 npm run debug
 ```
 
