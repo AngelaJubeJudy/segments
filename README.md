@@ -2,13 +2,11 @@
 # Core Functions
 ## Data Structure
 1. segments[]：只记录边界变化，区间中各点的 intensity 值按需推算
-2. 时间复杂度 O(n)，n 为区间中点的数量
+2. segments[] 由两部分数组组成：边界点，强度值
 
 ## Core Algorithm
 1. add(from, to, amount): 在指定区间 '[from, to)'增加强度值
-- 时间复杂度 O(n)，需要遍历现有区间
 2. set(from, to, amount): 在指定区间 '[from, to)'设置强度值
-- 时间复杂度 O(n)，需要遍历现有区间
 3. toString(): 返回字符串表示
 
 ## Design
@@ -120,7 +118,7 @@ segments.toString();// should be "[[10, -1], [20, 0], [30, -1], [40, 0]]"
 │   └── example.ts                     # 题目示例
 ├── package.json                       # 项目配置
 ├── tsconfig.json                      # TypeScript 配置
-├── jest.config.js                     # Jest 配置
+├── jest.config.js                     # Jest 测试配置
 ├── .eslintrc.js                       # ESLint 配置
 ├── .gitignore                         # Git 忽略
 └── README.md                          # 项目说明
