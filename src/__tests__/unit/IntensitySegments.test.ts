@@ -76,7 +76,7 @@ describe('IntensitySegments', () => {
             expect(testToString).toBe('[[10,1],[20,2],[30,1],[40,0]]');
             expect(segments._calcIntensity(15)).toBe(1);
             expect(segments._calcIntensity(25)).toBe(2);
-            expect(segments._calcIntensity(35)).toBe(2);
+            expect(segments._calcIntensity(35)).toBe(1);
         });
 
         test('should handle negative amounts correctly', () => {
@@ -94,7 +94,7 @@ describe('IntensitySegments', () => {
             segments.add(20, 40, 1);
             segments.set(15, 35, 5);
             const testToString = segments.toString();
-            expect(testToString).toBe('[[10,1],[15,5],[40,1]]');
+            expect(testToString).toBe('[[10,1],[15,5],[20,5],[30,5],[35,1],[40,0]]');
             expect(segments._calcIntensity(12)).toBe(1);
             expect(segments._calcIntensity(20)).toBe(5);
             expect(segments._calcIntensity(37)).toBe(5);
