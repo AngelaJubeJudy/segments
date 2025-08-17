@@ -16,6 +16,64 @@ export class IntensitySegments {
     constructor() {}
 
     /**
+     * Private Function: 搜索最大边界点
+     * 复杂度：O(log n) - 二分查找
+     * 
+     * @param target - 目标位置
+     * @returns 最大下边界点索引，没找到则返回 -1
+     */
+    private _binarySearchBoundary(target: number): number {
+        if (this.boundaries.length === 0) {
+            return -1;
+        }
+
+        let left = 0;
+        let right = this.boundaries.length - 1;
+        let result = -1;  // 初始化
+
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            
+            if (this.boundaries[mid] <= target) {
+                result = mid;
+                left = mid + 1; // 继续搜索
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Private Function: 搜索插入位置
+     * 复杂度：O(log n) - 二分查找
+     * 
+     * @param target - 目标位置
+     * @returns 应该插入的位置索引
+     */
+    private _binarySearchPosition(target: number): number {
+        if (this.boundaries.length === 0) {
+            return 0;
+        }
+
+        let left = 0;
+        let right = this.boundaries.length;
+
+        while (left < right) {
+            const mid = Math.floor((left + right) / 2);
+            
+            if (this.boundaries[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+
+        return left;
+    }
+
+    /**
      * Public Function 1: 累计 interval intensity
      * 
      * @param from - 区间起始点
@@ -50,7 +108,7 @@ export class IntensitySegments {
         }
 
         // 更新区间内的强度值
-        this._updateInterval(from, to, amount, false);  //复杂度：O(n)
+        this._updateInterval(from, to, amount, false);  //复杂度：O(n log n)
     }
     
     /**
@@ -73,11 +131,11 @@ export class IntensitySegments {
         }
 
         // step 1：清除目标区间内之前变化
-        this._clearInterval(from, to);  //复杂度：O(n)
+        this._clearInterval(from, to);  //复杂度：O(log n + k)
         
         // step 2：设置新值
         if (amount !== INTENSITY_CONSTANTS.ZERO_INTENSITY) {
-            this._updateInterval(from, to, amount, true);  //复杂度：O(n)
+            this._updateInterval(from, to, amount, true);  //复杂度：O(n log n)
         }
     }
 
@@ -114,7 +172,7 @@ export class IntensitySegments {
 
     /**
      * Private Function: 更新区间强度值
-     * 复杂度：O(n) - 重新计算所有受影响的区间内强度值
+     * 复杂度：O(n log n) - 收集边界点 + 排序 + 二分搜索计算强度值
      */
     private _updateInterval(from: number, to: number, amount: number, isSet: boolean): void {
         const pointsToProcess = new Set<number>();
@@ -165,16 +223,19 @@ export class IntensitySegments {
 
     /**
      * Private Function: 获取某点在更新前的强度值（用于 add 或 set 操作）
+     * 复杂度：O(log n) - 二分搜索
      */
     private _getIntensityAtPositionBeforeUpdate(position: number, from: number, to: number, isSet: boolean, setAmount: number): number {
-        let maxIndex = -1;
+        
+        const maxIndex = this._binarySearchBoundary(position);  //复杂度：O(logn)
+        // let maxIndex = -1;
 
-        // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
-        for (let i = 0; i < this.boundaries.length; i++) {
-            if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
-                maxIndex = i;
-            }
-        }
+        // // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
+        // for (let i = 0; i < this.boundaries.length; i++) {
+        //     if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
+        //         maxIndex = i;
+        //     }
+        // }
         
         // 没找到最小边界：返回强度初始值
         if (maxIndex === -1) {
@@ -198,18 +259,21 @@ export class IntensitySegments {
      * Private Function: 获取某点的强度值
      * 操作：通过找到小于等于该点的最大边界点来获取强度值
      * 原理：某一点的强度值，取决于其所在边界范围（interval）
+     * 复杂度：O(log n) - 二分搜索
      */
     private _getIntensityAtPosition(position: number): number {
-        let maxIndex = -1;
+        let maxIndex = this._binarySearchBoundary(position);  //复杂度：O(logn)
 
-        // 从左到右遍历边界点位置，找到顺序位置“≤”该点的最大边界
-        // 索引范围：-1 ≤ maxIndex ≤ boundaries.length - 1
-        // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
-        for (let i = 0; i < this.boundaries.length; i++) {
-            if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
-                maxIndex = i;
-            }
-        }
+        // let maxIndex = -1;
+
+        // // 从左到右遍历边界点位置，找到顺序位置“≤”该点的最大边界
+        // // 索引范围：-1 ≤ maxIndex ≤ boundaries.length - 1
+        // // 边界范围：boundaries[i] ≤ position ≤ boundaries.length - 1
+        // for (let i = 0; i < this.boundaries.length; i++) {
+        //     if (this.boundaries[i] <= position && (maxIndex === -1 || this.boundaries[i] > this.boundaries[maxIndex])) {
+        //         maxIndex = i;
+        //     }
+        // }
         
         // 找到边界，返回强度、否则返回 0（默认值）
         return maxIndex !== -1 ? this.intensities[maxIndex] : INTENSITY_CONSTANTS.INITIAL_INTENSITY;
@@ -217,30 +281,46 @@ export class IntensitySegments {
 
     /**
      * Private Function: 清除区间内的所有变化值
-     * 复杂度：O(n) - n为区间内边界点数量
+     * 复杂度：O(log n + k) - 二分搜索边界 + 删除操 k 个元素
      */
     private _clearInterval(from: number, to: number): void {
-        const indicesToRemove: number[] = [];
+        // const indicesToRemove: number[] = [];
         
-        // 找到目标区间
-        for (let i = 0; i < this.boundaries.length; i++) {
-            if (this.boundaries[i] >= from && this.boundaries[i] < to) {
-                indicesToRemove.push(i);
-            }
-        }
+        // // 找到目标区间
+        // for (let i = 0; i < this.boundaries.length; i++) {
+        //     if (this.boundaries[i] >= from && this.boundaries[i] < to) {
+        //         indicesToRemove.push(i);
+        //     }
+        // }
         
-        // 数组动态特性处理：从后往前删除，避免过程中引起的索引变化
-        for (let i = indicesToRemove.length - 1; i >= 0; i--) {
-            const index = indicesToRemove[i];
-            // 删除 index 位置的 1 个元素
-            this.boundaries.splice(index, 1);
-            this.intensities.splice(index, 1);
+        // // 数组动态特性处理：从后往前删除，避免过程中引起的索引变化
+        // for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+        //     const index = indicesToRemove[i];
+        //     // 删除 index 位置的 1 个元素
+        //     this.boundaries.splice(index, 1);
+        //     this.intensities.splice(index, 1);
+        // }
+
+        const startIndex = this._binarySearchPosition(from);
+        const endIndex = this._binarySearchPosition(to);
+        
+        // 改进点：批量删除
+        if (startIndex < endIndex) {
+            this.boundaries.splice(startIndex, endIndex - startIndex);
+            this.intensities.splice(startIndex, endIndex - startIndex);
         }
     }
 
     /**
      * Private Function: 计算某点 intensity
      * 复杂度：O(n) - 线性查找前一个边界点
+     * 
+     * @param target - 目标位置
+     * @returns 该位置的强度值
+     */
+    /**
+     * Private Function: 计算某点 intensity
+     * 复杂度：O(log n) - 二分搜索
      * 
      * @param target - 目标位置
      * @returns 该位置的强度值
