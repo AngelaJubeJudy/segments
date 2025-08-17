@@ -209,12 +209,12 @@ export class IntensitySegments {
                 }
             }
             
-            // 【边界处理】只保留强度值不为0的边界点（除了最后一个点）：（1）非零，（2）零值但最后一个边界点
-            if (newIntensity !== 0 || i === sortedPoints.length - 1) {
-                newBoundaries.push(position);
-                newIntensities.push(newIntensity);
-            }
+            // 【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
+            newBoundaries.push(position);
+            newIntensities.push(newIntensity);
         }
+
+        // TODO：【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
         
         // 更新内部状态
         this.boundaries = newBoundaries;
