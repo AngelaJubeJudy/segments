@@ -14,6 +14,14 @@ export interface ValidationResult {
 } 
 
 /**
+ * 边界检查结果
+ */
+export interface FilterResult {
+  filteredBoundaries: number[];
+  filteredIntensities: number[];
+} 
+
+/**
  * 各点强度统计结果
  */
 export interface IntensityResult {

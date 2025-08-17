@@ -1,4 +1,4 @@
-import { Segment } from './types/index';
+import { FilterResult, Segment } from './types/index';
 import { validateInput, validatePosition } from './utils/validator';
 import { INTENSITY_CONSTANTS } from './constants/index';
 
@@ -213,6 +213,12 @@ export class IntensitySegments {
             newIntensities.push(newIntensity);
         }
 
+        const result = this._filterSegments(newIntensities, newBoundaries);
+        this.boundaries = result.filteredBoundaries;
+        this.intensities = result.filteredIntensities;
+    }
+
+    _filterSegments(newIntensities: number[], newBoundaries: number[]): FilterResult{
         // 【上下边界处理】只保留强度值不为0的边界点（除了上边界）：（1）非零，（2）零值但上边界。
         const filteredBoundaries: number[] = [];
         const filteredIntensities: number[] = [];
@@ -250,9 +256,11 @@ export class IntensitySegments {
                 }
             }
         }
-        
-        this.boundaries = filteredBoundaries;
-        this.intensities = filteredIntensities;
+
+        return {
+            filteredBoundaries,
+            filteredIntensities
+        };
     }
 
     /**

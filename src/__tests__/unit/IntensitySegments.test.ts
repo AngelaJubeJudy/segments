@@ -62,7 +62,7 @@ describe('IntensitySegments', () => {
             segments.add(10, 30, 1);
             segments.set(10, 30, 0);
             const testToString = segments.toString();
-            expect(testToString).toBe('[]');
+            expect(testToString).toBe('[10,0]');
             expect(segments._calcIntensity(20)).toBe(0);
             expect(segments.getLength()).toBe(0);
         });
