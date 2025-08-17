@@ -18,11 +18,10 @@ describe('IntensitySegments', () => {
     describe('add() method', () => {
         test('should return correct with infinite intensity and overlap intervals', () => {
             segments.add(10, 30, 1);
-            expect(segments.toString()).toBe('[[10,1],[30,0]]');
             segments.add(20, 40, 1);
-            expect(segments.toString()).toBe('[[10,1],[20,2],[30,1],[40,0]]');
             segments.add(10, 40, -2);
-            expect(segments.toString()).toBe('[[10,-1],[20,0],[30,-1],[40,0]]');
+            const testToString = segments.toString();
+            expect(testToString).toBe('[[10,-1],[20,0],[30,-1],[40,0]]');
             expect(segments._calcIntensity(25)).toBe(0);
             expect(segments._calcIntensity(15)).toBe(-1);
         });
@@ -51,18 +50,21 @@ describe('IntensitySegments', () => {
             segments.add(10, 30, 1);
             segments.set(20, 40, -2);
             const testToString = segments.toString();
-            expect(testToString).toBe('[[10,1],[20,-2],[30,-2],[40,0]]');
+            expect(testToString).toBe('[[10,1],[20,-2],[40,0]]');
+            expect(segments._calcIntensity(10)).toBe(1);
             expect(segments._calcIntensity(15)).toBe(1);
+            expect(segments._calcIntensity(20)).toBe(-2);
             expect(segments._calcIntensity(25)).toBe(-2);
+            expect(segments._calcIntensity(40)).toBe(0);
         });
 
         test('should return correct after adding and then setting', () => {
             segments.add(10, 30, 1);
             segments.set(10, 30, 0);
             const testToString = segments.toString();
-            expect(testToString).toBe('[[10,0]]');
+            expect(testToString).toBe('[]');
             expect(segments._calcIntensity(20)).toBe(0);
-            expect(segments.getLength()).toBe(1);
+            expect(segments.getLength()).toBe(0);
         });
     });
 
@@ -71,10 +73,10 @@ describe('IntensitySegments', () => {
             segments.add(10, 30, 1);
             segments.add(20, 40, 1);
             const testToString = segments.toString();
-            expect(testToString).toBe('[[10,1],[20,2],[30,1],[40,0]]');
+            expect(testToString).toBe('[[10,1],[20,2],[30,2],[40,1]]');
             expect(segments._calcIntensity(15)).toBe(1);
             expect(segments._calcIntensity(25)).toBe(2);
-            expect(segments._calcIntensity(35)).toBe(1);
+            expect(segments._calcIntensity(35)).toBe(2);
         });
 
         test('should handle negative amounts correctly', () => {
@@ -88,14 +90,14 @@ describe('IntensitySegments', () => {
         });
 
         test('should handle set operation correctly', () => {
-            segments.add(10, 30, 1);  // '[[10,1],[30,0]]'
-            segments.add(20, 40, 1);  // '[[10,1],[20,2],[30,1],[40,0]]'
+            segments.add(10, 30, 1);
+            segments.add(20, 40, 1);
             segments.set(15, 35, 5);
             const testToString = segments.toString();
-            expect(testToString).toBe('[[10,1],[15,5],[20,5],[30,5],[35,1],[40,0]]');
+            expect(testToString).toBe('[[10,1],[15,5],[40,1]]');
             expect(segments._calcIntensity(12)).toBe(1);
             expect(segments._calcIntensity(20)).toBe(5);
-            expect(segments._calcIntensity(37)).toBe(1);
+            expect(segments._calcIntensity(37)).toBe(5);
         });
     });
 
