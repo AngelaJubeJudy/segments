@@ -12,7 +12,7 @@ import { INTENSITY_CONSTANTS } from './constants/index';
  * 当某点的强度变为0时，该边界点被删除（除了最后一个点）
  */
 export class IntensitySegments {
-    // 使用有序数组存储边界点，每个点记录从该点开始的强度值
+    // 有序数组存储边界，每个点记录从该点开始的强度值
     private boundaries: number[] = [];
     private intensities: number[] = [];
     
@@ -28,7 +28,7 @@ export class IntensitySegments {
      * @example
      * ```typescript
      * segments.add(10, 30, 1);  // 在[10,30)上增加强度1，输出 "[[10, 1], [30, 0]]"
-     * segments.add(20, 40, 1);  // 在[20,40)上增加强度1，输出 "[[10, 1], [20, 2], [30, 2], [40, 1]]"
+     * segments.add(20, 40, 1);  // 在[20,40)上增加强度1，输出 "[[10, 1], [20, 2], [30, 1], [40, 0]]"
      * segments.add(10, 40, -2);  // 在[10,40)上减少强度2，输出 "[[10, -1], [20, 0], [30, -1], [40, 0]]"
      * ```
      */
@@ -109,20 +109,17 @@ export class IntensitySegments {
 
     /**
      * Private Function: 更新区间强度值
-     * 复杂度：O(n) - 需要重新计算所有受影响区间的强度值
+     * 复杂度：O(n) - 重新计算所有受影响的区间内强度值
      */
     private _updateInterval(from: number, to: number, amount: number, isSet: boolean): void {
-        // 收集所有需要处理的边界点
         const pointsToProcess = new Set<number>();
         pointsToProcess.add(from);
         pointsToProcess.add(to);
         
-        // 添加所有现有的边界点
+        // 添加边界
         for (let i = 0; i < this.boundaries.length; i++) {
             pointsToProcess.add(this.boundaries[i]);
         }
-        
-        // 转换为数组并排序
         const sortedPoints = Array.from(pointsToProcess).sort((a, b) => a - b);
         
         // 重新计算每个边界点的强度值
